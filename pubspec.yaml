@@ -1,0 +1,26 @@
+name: apex_market
+description: "APEX Market — гибрид маркетплейса и барахолки с Telegram-верификацией, AI-оценкой фото и умным ассистентом APEX AI."
+publish_to: 'none'
+
+version: 2.0.0+205
+
+environment:
+  sdk: '>=3.4.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  image_picker: ^1.1.2
+  http: ^1.2.2
+  shared_preferences: ^2.3.2
+  url_launcher: ^6.3.0
+  google_fonts: ^6.2.1
+  lucide_icons: ^0.257.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^4.0.0
+
+flutter:
+  uses-material-design: true
