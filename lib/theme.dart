@@ -266,7 +266,7 @@ class ApexTheme {
           borderSide: const BorderSide(color: ApexPalette.accent, width: 1.4),
         ),
       ),
-      pageTransitionsTheme: const PageTransitionsTheme(
+      pageTransitionsTheme: PageTransitionsTheme(
         builders: {
           TargetPlatform.android: ZoomPageTransitionsBuilder(),
           TargetPlatform.iOS: CupertinoPageTransitionsBuilder(),
