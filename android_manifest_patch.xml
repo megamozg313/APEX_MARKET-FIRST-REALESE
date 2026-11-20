@@ -1,0 +1,35 @@
+<!-- ============================================================
+     APEX Market — фрагмент для вставки внутрь <manifest> ... </manifest>
+     Вставляется автоматически шагом "Patch AndroidManifest.xml"
+     в .github/workflows/build.yml сразу после открывающего тега <manifest>.
+     ============================================================ -->
+
+<!-- Сеть: запросы к API, картинкам, Telegram-боту верификации -->
+<uses-permission android:name="android.permission.INTERNET" />
+
+<!-- Камера: съёмка фото товара для AI-оценки -->
+<uses-permission android:name="android.permission.CAMERA" />
+
+<!-- Доступ к изображениям на Android 13+ (READ_MEDIA_IMAGES) -->
+<uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
+
+<!-- Доступ к изображениям на Android 12 и ниже -->
+<uses-permission
+    android:name="android.permission.READ_EXTERNAL_STORAGE"
+    android:maxSdkVersion="32" />
+
+<!-- Package visibility (Android 11+): открытие ссылок, Telegram, звонки продавцу -->
+<queries>
+    <intent>
+        <action android:name="android.intent.action.VIEW" />
+        <data android:scheme="https" />
+    </intent>
+    <intent>
+        <action android:name="android.intent.action.VIEW" />
+        <data android:scheme="http" />
+    </intent>
+    <intent>
+        <action android:name="android.intent.action.DIAL" />
+        <data android:scheme="tel" />
+    </intent>
+</queries>
