@@ -1,0 +1,95 @@
+name: Build APEX Market APK
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build-apk:
+    name: Build release APK
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17 (Temurin)
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Set up Flutter (stable, cached)
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Scaffold Android platform
+        run: |
+          flutter create . --platforms=android --org com.apex.market --project-name apex_market
+          rm -f test/widget_test.dart
+
+      - name: Patch AndroidManifest.xml
+        run: |
+          python3 - <<'PY'
+          import re
+          import sys
+          import xml.etree.ElementTree as ET
+          from pathlib import Path
+
+          manifest_path = Path('android/app/src/main/AndroidManifest.xml')
+          patch_path = Path('android_manifest_patch.xml')
+
+          if not manifest_path.exists():
+              sys.exit('AndroidManifest.xml not found: %s' % manifest_path)
+          if not patch_path.exists():
+              sys.exit('Patch file not found: %s' % patch_path)
+
+          src = manifest_path.read_text(encoding='utf-8')
+          block = patch_path.read_text(encoding='utf-8').strip()
+
+          if 'android:label=' in src:
+              src = re.sub(r'android:label="[^"]*"', 'android:label="APEX Market"', src, count=1)
+          else:
+              src = re.sub(r'<application\b', '<application\n        android:label="APEX Market"', src, count=1)
+
+          if 'READ_MEDIA_IMAGES' not in src:
+              match = re.search(r'<manifest\b[^>]*>', src)
+              if not match:
+                  sys.exit('<manifest> opening tag not found')
+              src = src[:match.end()] + '\n\n' + block + '\n' + src[match.end():]
+          else:
+              print('Permissions already present, skipping injection.')
+
+          try:
+              ET.fromstring(src)
+          except ET.ParseError as error:
+              sys.exit('Patched AndroidManifest.xml is not valid XML: %s' % error)
+
+          manifest_path.write_text(src, encoding='utf-8')
+          print('AndroidManifest.xml patched successfully.')
+          PY
+
+      - name: Resolve dependencies
+        run: flutter pub get
+
+      - name: Static analysis
+        run: flutter analyze --no-fatal-infos
+
+      - name: Build release APK
+        run: flutter build apk --release
+
+      - name: Upload APK artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: APEX-Market-APK
+          path: build/app/outputs/flutter-apk/app-release.apk
+          if-no-files-found: error
+          retention-days: 30
